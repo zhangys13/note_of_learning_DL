@@ -13,7 +13,7 @@
 
 3）若 training  loss 增加，有可能是 learning rate 太大；
 
-​	loss 下降太慢（几百个 epoch 都还很高），可能是 learning rate 太小；
+​loss 下降太慢（几百个 epoch 都还很高），可能是 learning rate 太小；
 
 4）**learning rate decay**
 
@@ -53,9 +53,10 @@ minibatch size 增加，
 
 缺点：训练噪声变小，容易**陷入局部极值**；
 
-4）若想用很大的 minibatch size，需要调整 learning rate；如下图：![hyper_param 2017-07-25 下午10.35.15](./pics/hyper_param 2017-07-25 下午10.35.15.png)
+4）若想用很大的 minibatch size，需要调整 learning rate；如下图：
+![minibatch size1](./pics/hyper_param2017-07-2510.35.15.png)
 
-![hyper_param 2017-07-25 下午10.35.48](./pics/hyper_param 2017-07-25 下午10.35.48.png )
+![minibatch size2](./pics/hyper_param2017-07-2510.35.48.png )
 
 #### 1.1.3 epochs number
 
@@ -89,7 +90,7 @@ minibatch size 增加，
 >
 > https://arxiv.org/abs/1412.3555
 
-![hyper_param 2017-07-25 下午10.54.09](./pics/hyper_param 2017-07-25 下午10.54.09.png)
+![lstm_gru](./pics/hyper_param2017-07-2510.54.09.png)
 
 ##### 1.2.3.2 how deep the net
 
@@ -103,13 +104,13 @@ minibatch size 增加，
 
 > 在有些数据集上，embedding size 越大越好（至少200是可行的）。
 
-![hyper_param 2017-07-25 下午11.09.55](./pics/hyper_param 2017-07-25 下午11.09.55.png)
+![embedding size1](./pics/hyper_param2017-07-2511.09.55.png)
 
 > 但在有些数据集上，增大到50后，就无所增益了。
 
 感觉是由于问题简单，到50时，准确率就已经非常高了。
 
-![hyper_param 2017-07-25 下午11.10.09](./pics/hyper_param 2017-07-25 下午11.10.09.png)
+![embedding size2](./pics/hyper_param2017-07-2511.10.09.png)
 
 **RNN 架构示例**
 
