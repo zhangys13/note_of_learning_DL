@@ -4,7 +4,8 @@ Udacity 学习笔记，2017.7.28
 
 参考网址：[udacity BN](https://github.com/udacity/deep-learning/blob/master/batch-norm/Batch_Normalization_Lesson.ipynb)
 
-[TOC]
+[TOC]    
+
 ##1、What 是什么
 ### 发明：
 
@@ -43,17 +44,22 @@ BN使构建更深的网络变容易，也很有帮助。
 这里被计算平均值的不是 input layer 的输入，而是BN插入点，前面连着的 node 的输出。    
 通常，BN 插在某层的激活函数前，那就计算该层 hidden unit 的输出的 mini batch 平均值。    
 **（问题：μB 是每个output channel 一个？还是整个 layer 整体一个？）**   
-（回答：都不是。详见4.2节，而是每个输出点，都统计一个 mean 和 variance。公式(1)里的 m 就是 mini batch size。μ、σ、γ、β的不只有一组，而是看 fc_layer 里有多少 hidden units。关于 CNN 的参见 章节5.1）   
+（回答：都不是。详见4.2节，而是每个输出点，都统计一个 mean 和 variance。公式(1)里的 m 就是 mini batch size。μ、σ、γ、β的不只有一组，而是看 fc_layer 里有多少 hidden units。关于 CNN 的参见 章节5.1）    
+
 $$
 \mu_B \leftarrow \frac{1}{m}\sum_{i=1}^m x_i
 $$
+
 $$
 \sigma_{B}^{2} \leftarrow \frac{1}{m}\sum_{i=1}^m (x_i - \mu_B)^2
 $$
+
 ### 3.2 归一化计算
+
 $$
 \hat{x_i} \leftarrow \frac{x_i - \mu_B}{\sqrt{\sigma_{B}^{2} + \epsilon}}
 $$
+
 有一个**超参** $\epsilon$ 可以确保我们不要尝试除以零，也可以为每个批次增加略微的差异（噪声帮助范化）。**通常取 0.001**。   
 **为什么增加一点方差？** 这在统计上说得通的。因为，虽然我们是对 mini batch 做归一化，但我们也在试图依据整个 training set 的分布。training set它本身就是将来应用时，整个可能数据集的一个子集。 全集的方差 比 子集的方差大一点，因此每个mini batch增加一点点的方差，也是考虑到这一点。
 ### 3.3 线性变化（γ 和 β）
@@ -74,6 +80,7 @@ $$
 （1）另外有 **pop_mean 和 pop_variance**，在 **inference** 时使用。   
 他们会统计整个 training set。用来逼近 general population distribution，它们将用于训练完成后的 inference 过程。   
 下面公式表示，在新的 第 t+1次 mini batch时，pop_mean如何更新（pop_variance 类似）。decay 常用0.99。
+
 $$
 \mu_{pop,t+1}=\mu_{pop,t}*decay+\mu_{batch,t+1}*(1-decay)
 $$
