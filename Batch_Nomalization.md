@@ -1,6 +1,9 @@
 # Batch Nomalization
 
 Udacity 学习笔记，2017.7.28   
+
+参考网址：[udacity BN](https://github.com/udacity/deep-learning/blob/master/batch-norm/Batch_Normalization_Lesson.ipynb)
+
 [TOC]
 ##1、What 是什么
 ### 发明：
@@ -39,7 +42,7 @@ BN使构建更深的网络变容易，也很有帮助。
 ### 3.1 计算 mean 和 variance
 这里被计算平均值的不是 input layer 的输入，而是BN插入点，前面连着的 node 的输出。    
 通常，BN 插在某层的激活函数前，那就计算该层 hidden unit 的输出的 mini batch 平均值。    
-**（问题：μB 是每个output channel 一个？还是整个 feature map 整体一个？）**   
+**（问题：μB 是每个output channel 一个？还是整个 layer 整体一个？）**   
 （回答：都不是。详见4.2节，而是每个输出点，都统计一个 mean 和 variance。公式(1)里的 m 就是 mini batch size。μ、σ、γ、β的不只有一组，而是看 fc_layer 里有多少 hidden units。关于 CNN 的参见 章节5.1）   
 $$
 \mu_B \leftarrow \frac{1}{m}\sum_{i=1}^m x_i
@@ -98,7 +101,7 @@ $$
 4. TensorFlow 不会自动的运行`tf.assign`，因为在 graph 中，它没有被连接在 opt node 所能朔回“树”结构里，`tf.assign`是一个孤立点，不被依赖。   
    通过 with 语句，可以增添依赖关系:`with tf.control_dependencies([train_mean, train_variance]):`
 5. ​最底层运算仍是隐式的，藏在`tf.nn.batch_normalization`里。
-6. 在 training 和 inference 时，使用的是不同的μ和σ。使用 `tf.cond`方法，通过`self.is_training`变量，确定当前状态，来使用不同的μ和σ。
+6. 在 training 和 inference 时，使用的是不同的μ和σ。使用 `tf.cond`方法，通过`self.is_training`变量(该变量不是 tf 自带的，是该 demo自己在 class 里加的)，确定当前状态，来使用不同的μ和σ。
 7. 使用`tf.nn.moments`函数，可以计算mini batch 的 μ和σ。
 
 ```python
@@ -170,16 +173,16 @@ return tf.nn.batch_normalization(linear_output, batch_mean, batch_variance, beta
 normalized_linear_output = (linear_output - batch_mean) / tf.sqrt(batch_variance + epsilon)
 return gamma * normalized_linear_output + beta
 ```
-## 5、在FC 以外的其他NN 中使用
+## 5、在FC以外的其他NN 中使用
 
 ### 5.1 CNN
 
 （1）定义明确一下：   
-一个 CNN layer 输出若干个 feature_map。   
+一个 CNN layer 输出若干个 feature_map（有多少 output channel，就有多少feature_map）。   
 一个 feature_map，对应一个 CNN kernel，shape 为 o_h\*o_w\*1 。   
 
 （2）一组 μ 和 σ 对应一个 feature map，而不是之前 fc_layer 里的一个 hidden unit。   
-对应代码，之前是：
+对应代码，之前 fc_layer 是：
 
 ```python
 batch_mean, batch_variance = tf.nn.moments(linear_output, [0])
