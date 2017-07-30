@@ -6,15 +6,15 @@ Udacity 学习笔记，2017.7.28
 
 [TOC]    
 
-##1、What 是什么
+## 1、What 是什么
 ### 发明：
 
 Batch normalization（BN）是由Sergey Ioffe 和 Christian Szegedy 在2015年提出的，在 paper [Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift](https://arxiv.org/pdf/1502.03167.pdf) 里。   
-###Idea：   
+### Idea：   
 不只在 **input layer** 去做输入归一化，而是在**每一层 layer** 都做输入归一化。   
 ‘Batch’ 是指在归一化计算时，基于当前的 mini-batch 去计算 mean 和 variance。   
 灵感来自于“将输入规范化到网络可以帮助网络学习”，可以想象中间某层，从前层接收的，也是某种程度的“输入”。   
-##2、Why 什么好处
+## 2、Why 什么好处
 总的来说，能帮助更好的 training。减少一些“炼丹”调参的压力。   
 ### 2.1 网络训练更快
 其实，加了 BN，计算量增加的，一个 epoch 需要更多的计算时间。但收敛变快，应该需要的 epoch 数量减少，总的训练时间变短。
