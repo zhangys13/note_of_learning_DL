@@ -18,17 +18,26 @@ git 项目[conv_arithmetic](https://github.com/vdumoulin/conv_arithmetic)
 
 上图左侧是普通卷积，no padding，stride=2；右侧是**反卷积**，正好是左侧的反。   
 **反卷积**的具体计算是：   
-（1）输入的每个点，都作为一个放大倍率，去乘以 kernel 中的 Weight 矩阵。标量乘矩阵，得到矩阵，*一个“点”扩大为一个“小平面”*。   
+（1）输入的每个点，都作为一个放大倍率，去乘以 kernel 中的 Weight 矩阵。标量乘矩阵，得到矩阵，**一个“点”扩大为一个“小平面”**。   
+
 例如，上图中1号点，扩大为绿色框那么大。
 
-（2）各个“点”扩大成的各个“小面”，根据空间位置和 stride 值，排布成为一个“大平面”。各个“小面”之间如果有 overlap，就把 overlap 的矩阵元素相加。(**注意：反卷积时，stride 值是用于各个“小平面”在排布时，怎样去拼接**)   
-例如，1号点 和 2号点 扩大为的两个“小面”在蓝框的位置有 overlap；   
-1号点 和 3号点 扩大为的两个“小面”在红框的位置有 overlap；   
-红框、蓝框都有的那个点，是四个“小面”都 overlap 的地方；
+（2）各个“点”扩大成的各个“小平面”，根据空间位置和 stride 值，排布成为一个“大平面”。各个“小平面”之间如果有 overlap，就把 overlap 的矩阵元素相加。(**注意：反卷积时，stride 值是用于各个“小平面”在排布时，怎样去拼接**)   
 
-（3）如果有多个 channel，**一个“点”扩大为一个“小立方块”**。   
+例如，1号点 和 2号点 扩大为的两个“小平面”在蓝框的位置有 overlap；   
+1号点 和 3号点 扩大为的两个“小面”在红框的位置有 overlap；   
+红框、蓝框都有的那个点，是四个“小平面”都 overlap 的地方；
+
+（3）如果**反卷积的输出有多个 channel**，那么意味着一个 kernel 有多个 channel，**一个“点”扩大为一个“小立方块”**。   
 各个“小立方块”，在H、W 方向上，根据空间位置和 stride 值，排布成一个更高更宽的“大立方块”。   
-C 方向全是 overlap，out channel 和 kernel 的 channel 数值一致。
+out channel 和 kernel 的 channel 数值一致。
+
+（4）如果**反卷积的输入有多个 channel**，那么意味着有 多个 kernel。每个反卷积输入的一个 channel 对应着一个 kernel。    
+ 计算时，某个点属于哪个 channel，就**只乘以对应的某个 kernel**（标量乘矩阵），而不用逐个乘以各个 kernel。拼接“大立方块”，只看某点h、w的空间位置，c 方向全是重叠 overlap。   
+
+ 例如，   
+ 图中左侧，若输出要有2个channel，则左侧图普通卷积需要2个 kernel才能卷出 2channel来。
+ 图中右侧，若输入有2个 channel，1\~4点的后面还有5\~8点，则反卷积也需要2个 kernel。但输出有几个 channel，要看每个kernel有几个 channel。（参见试验2.4）
 
 （4）git 项目[conv_arithmetic](https://github.com/vdumoulin/conv_arithmetic) 给出的动图，也能从另一个角度帮助思考：
 
@@ -105,7 +114,7 @@ The shape of y:	 (1, 5, 5, 1) ,	 and the y.reshape(5,5) is :
  [  4.   5.  10.   5.   6.]
  [  7.   8.  16.   8.   9.]]
 ```
-（2）其他不变，把 stride增大为3。打印如下：
+（2）其他不变，把 stride增大为3，拼接时没有 overlap。打印如下：
 
 ```
 The shape of x:	 (1, 2, 2, 1) ,	 and the x.reshape(2,2) is :
@@ -145,13 +154,15 @@ The shape of y:	 (1, 6, 6, 1) ,	 and the y.reshape(6,6) is :
 
 （4）关于多 channel 的试验：
 
+输入 channel 变为2，kernel 相应变为2个，每个 kernel 的 channel 仍然等于1。
+
 ```python
 import numpy as np
 import tensorflow as tf
 
 tf.reset_default_graph()
-# [batch, height, width, channel]
 x_image = tf.placeholder(tf.float32,shape=[2,2,2])
+# [batch, height, width, channel]
 x = tf.reshape(x_image,[1,2,2,2])
 
 # W_cpu = np.array([[[1,2,3],[4,5,6],[7,8,9]],[[1,2,3],[4,5,6],[7,8,9]]],dtype=np.float32)
